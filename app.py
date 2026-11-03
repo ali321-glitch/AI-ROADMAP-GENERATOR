@@ -1,10 +1,6 @@
 import os
 import streamlit as st
-
 from google import genai
-
-# Load environment variables for local development
-
 
 # Page configuration
 st.set_page_config(
@@ -13,25 +9,25 @@ st.set_page_config(
 
 
 def get_gemini_client():
-  """Initializes the Gemini client using Streamlit secrets or local .env"""
-  api_key = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+  """Initializes the Gemini client using Streamlit secrets"""
+  api_key = st.secrets.get("GEMINI_API_KEY")
   if not api_key:
     return None
   return genai.Client(api_key=api_key)
 
 
 def generate_roadmap(field, level, duration):
-  """Generates a learning roadmap using Gemini API"""
+  """Generates a learning roadmap using Gemini Flash model"""
   client = get_gemini_client()
   if not client:
     st.error(
-        "🔑 Gemini API Key not found! Please check your environment variables"
-        " or Streamlit secrets."
+        "🔑 Gemini API Key not found in Streamlit Secrets! Please add it in"
+        " your app settings."
     )
     return None
 
   prompt = f"""
-    Create a detailed, structured learning roadmap for someone who wants to learn about: {field}.
+    Create a detailed, structured learning roadmap for someone who wants to master: {field}.
     Their current skill level is: {level}.
     The time available to learn is: {duration}.
 
@@ -57,7 +53,7 @@ def generate_roadmap(field, level, duration):
 st.title("🚀 AI Learning Roadmap Generator")
 st.markdown(
     "Generate a personalized, step-by-step learning path tailored to your"
-    " goals, experience level, and timeline powered by Google Gemini."
+    " goals, experience level, and timeline powered by Google Gemini Flash."
 )
 
 # Sidebar for User Inputs
@@ -65,12 +61,12 @@ with st.sidebar:
   st.header("🎯 Roadmap Parameters")
 
   field_input = st.text_input(
-      "What do you want to learn?",
-      placeholder="e.g., Machine Learning, Rust, UI/UX Design",
+      "What domain do you want to learn?",
+      placeholder="e.g., Artificial Intelligence, React, Cybersecurity",
   )
 
   level_input = st.selectbox(
-      "Select your current level:", ["Beginner", "Intermediate", "Advanced"]
+      "Select your skill level:", ["Beginner", "Intermediate", "Advanced"]
   )
 
   time_input = st.text_input(
@@ -82,10 +78,10 @@ with st.sidebar:
 # Main Content Area
 if generate_btn:
   if not field_input or not time_input:
-    st.warning("⚠️ Please fill in both the field/topic and your time commitment.")
+    st.warning("⚠️ Please fill in both the domain/field and your time commitment.")
   else:
     with st.spinner(
-        "🧠 Gemini is crafting your customized learning path..."
+        "🧠 Gemini Flash is crafting your customized learning path..."
     ):
       roadmap_text = generate_roadmap(field_input, level_input, time_input)
 
