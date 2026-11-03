@@ -1,31 +1,23 @@
-import os
+import google.generativeai as genai
 import streamlit as st
-from google import genai
 
 # Page configuration
 st.set_page_config(
     page_title="AI Learning Roadmap Generator", page_icon="🚀", layout="wide"
 )
 
-
-def get_gemini_client():
-  """Initializes the Gemini client using Streamlit secrets"""
-  api_key = st.secrets.get("GEMINI_API_KEY")
-  if not api_key:
-    return None
-  return genai.Client(api_key=api_key)
+# Initialize Gemini API using Streamlit secrets
+if "GEMINI_API_KEY" in st.secrets:
+  genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+else:
+  st.error(
+      "🔑 GEMINI_API_KEY not found in Streamlit Secrets! Please add it in your"
+      " app settings."
+  )
 
 
 def generate_roadmap(field, level, duration):
-  """Generates a learning roadmap using Gemini Flash model"""
-  client = get_gemini_client()
-  if not client:
-    st.error(
-        "🔑 Gemini API Key not found in Streamlit Secrets! Please add it in"
-        " your app settings."
-    )
-    return None
-
+  """Generates a learning roadmap using Gemini Flash"""
   prompt = f"""
     Create a detailed, structured learning roadmap for someone who wants to master: {field}.
     Their current skill level is: {level}.
@@ -39,10 +31,9 @@ def generate_roadmap(field, level, duration):
     """
 
   try:
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
+    # Using gemini-1.5-flash for fast and reliable text generation
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
     return response.text
   except Exception as e:
     st.error(f"⚠️ Error generating roadmap: {e}")
@@ -53,7 +44,7 @@ def generate_roadmap(field, level, duration):
 st.title("🚀 AI Learning Roadmap Generator")
 st.markdown(
     "Generate a personalized, step-by-step learning path tailored to your"
-    " goals, experience level, and timeline powered by Google Gemini Flash."
+    " goals, experience level, and timeline powered by Google Gemini."
 )
 
 # Sidebar for User Inputs
@@ -80,9 +71,7 @@ if generate_btn:
   if not field_input or not time_input:
     st.warning("⚠️ Please fill in both the domain/field and your time commitment.")
   else:
-    with st.spinner(
-        "🧠 Gemini Flash is crafting your customized learning path..."
-    ):
+    with st.spinner("🧠 Gemini is crafting your customized learning path..."):
       roadmap_text = generate_roadmap(field_input, level_input, time_input)
 
       if roadmap_text:
