@@ -1,10 +1,10 @@
 import os
 import streamlit as st
-from dotenv import load_dotenv
+
 from google import genai
 
 # Load environment variables for local development
-load_dotenv()
+
 
 # Page configuration
 st.set_page_config(
